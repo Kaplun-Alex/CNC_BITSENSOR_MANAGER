@@ -118,7 +118,6 @@ def go_run():
         print(mess)
         sock.send(mess.encode())
         data = sock.recv(256)
-
         #sock.close()
         print(data)
         time.sleep(0.001)
