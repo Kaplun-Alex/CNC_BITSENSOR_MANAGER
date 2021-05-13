@@ -29,9 +29,9 @@ def read_board_cor(q):
     global data
     while True:
         data = (conn.recv(128).decode()).split('*')
-        #print(data)
+        print(data, type(data))
         r = dev.read(0x81, 49, 64)
-        conn.send('server ECHOES'.encode() + str(r).encode())
+        conn.send(str(r).encode())
         q.put(r)
 
 def serv_process():
@@ -48,8 +48,8 @@ def serv_process():
         dec_x_cor = struct.unpack('>i', bytes.fromhex(hex_x_cor))
         hex_y_cor = bytes(y_cor).hex()
         dec_y_cor = struct.unpack('>i', bytes.fromhex(hex_y_cor))
-        #hex_z_cor = bytes(z_cor).hex()
-        #hex_a_cor = bytes(a_cor).hex()
+        hex_z_cor = bytes(z_cor).hex()
+        hex_a_cor = bytes(a_cor).hex()
         #print('координати x:', hex_x_cor)
         #print('координати y:', hex_y_cor)
         #print(x_cor, y_cor, z_cor, a_cor)
@@ -58,58 +58,49 @@ def serv_process():
         #print('координати кдієнта х', dec_x_cor)
         #print('координати клієнта y:', dec_y_cor)
 
-'''        
-        if dec_x_cor[0] == client_cor_x:
-            print('Same')
-        elif dec_x_cor[0] < client_cor_x:
-            dev.write(0x1, mes_plus, 10)
-        else:
-            dev.write(0x1, mes_minus, 10)
-        #conn.send('server ECHOE'.encode() + str(r).encode())
-        '''
 def keyboard_realese():
     max_speeed = 100
     dynamic_speed = 25
     count = 0
-    x_mes_plus = [3, 5, 0, 2, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    x_mes_minus = [3, 5, 0, 2, 0, 0, 0, 0, 0, 155, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    y_mes_plus = [3, 5, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    y_mes_minus = [3, 5, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 155, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    z_mes_plus = [3, 5, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    z_mes_minus = [3, 5, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 155, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    a_mes_plus = [3, 5, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 0]
-    a_mes_minus = [3, 5, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 155, 255, 255, 255, 0, 0, 0, 0, 0]
+    x_mes_plus = [3, 5, 0, 2, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    x_mes_minus = [3, 5, 0, 2, 0, 0, 0, 0, 0, 245, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    y_mes_plus = [3, 5, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 108, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    y_mes_minus = [3, 5, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 245, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    z_mes_plus = [3, 5, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    z_mes_minus = [3, 5, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 245, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    a_mes_plus = [3, 5, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0]
+    a_mes_minus = [3, 5, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 245, 255, 255, 255, 0, 0, 0, 0, 0]
     x_buffer = 0
     y_buffer = 0
     z_buffer = 0
     a_buffer = 0
     while True:
         if keyboard.is_pressed('6'):  # if key 'q' is pressed
-            x_buffer += 1
+            #x_buffer += 1
             dev.write(0x1, x_mes_plus, 10)
         if keyboard.is_pressed('4'):  # if key 'q' is pressed
-            x_buffer -= 1
+            #x_buffer -= 1
             dev.write(0x1, x_mes_minus, 10)
         if keyboard.is_pressed('8'):  # if key 'q' is pressed
-            y_buffer += 1
+            #y_buffer += 1
             dev.write(0x1, y_mes_plus, 10)
         if keyboard.is_pressed('2'):  # if key 'q' is pressed
-            y_buffer -= 1
+            #y_buffer -= 1
             dev.write(0x1, y_mes_minus, 10)
         if keyboard.is_pressed('+'):  # if key 'q' is pressed
-            z_buffer += 1
+            #z_buffer += 1
             dev.write(0x1, z_mes_plus, 10)
         if keyboard.is_pressed('-'):  # if key 'q' is pressed
-            z_buffer -= 1
+            #z_buffer -= 1
             dev.write(0x1, z_mes_minus, 10)
         if keyboard.is_pressed('0'):  # if key 'q' is pressed
-            a_buffer += 1
+            #a_buffer += 1
             dev.write(0x1, a_mes_plus, 10)
         if keyboard.is_pressed('.'):  # if key 'q' is pressed
-            a_buffer -= 1
+            #a_buffer -= 1
             dev.write(0x1, a_mes_minus, 10)
-        sleep(0.0001)
-        print(count, x_buffer, y_buffer, z_buffer, a_buffer)
+        #sleep(0.1)
+        #print(count, x_buffer, y_buffer, z_buffer, a_buffer)
 
 q = queue.Queue()
 def run():
