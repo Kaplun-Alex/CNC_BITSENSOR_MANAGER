@@ -4,8 +4,8 @@ import queue
 import usb.util
 import usb.core
 import socket
-import struct
 import keyboard
+import get_speed_profiile
 
 
 VENDOR_ID = 0xA720
@@ -18,52 +18,57 @@ dev.write(0x01, [2, 2, 0, 5, 0, 0, 0, 0, 0], 10)
 dev.write(0x01, [2, 10, 0, 36, 1, 0, 0, 0, 0], 10)
 dev.write(0x01, [3, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 0, 0, 0, 0, 0], 10)
 dev.write(0x01, [3, 5, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 10)
-board_sock = socket.socket()
-board_sock.bind(('', 5150))
-board_sock.listen(1)
-conn, addr = board_sock.accept()
 
-data = []
 
 def read_board_cor(q):
-    global data
+    mes_dict = {1: '<ОК>', 2: '<COR>'}
+    board_sock = socket.socket()
+    board_sock.bind(('', 5150))
+    board_sock.listen(1)
+    conn, addr = board_sock.accept()
+    print(conn, addr)
     while True:
-        data = (conn.recv(128).decode()).split('*')
-        print(data, type(data))
+        data = (conn.recv(128).decode())
+        if data != mes_dict[1]:
+            coordinate_worker(data)
         r = dev.read(0x81, 49, 64)
         conn.send(str(r).encode())
         q.put(r)
 
+def coordinate_worker(data):
+    c = data.split('*')
+    print('C - ', c)    # C -  ['<COR>', '09937', '03331', '0333317', '033971', '<COR>']
+    x_cor = get_speed_profiile.list_creator(255, 10, int(c[1]))
+    y_cor = get_speed_profiile.list_creator(255, 10, int(c[2]))
+    z_cor = get_speed_profiile.list_creator(255, 10, int(c[3]))
+    doz_cor = get_speed_profiile.list_creator(255, 10, int(c[4]))
+    print(x_cor, y_cor, z_cor, doz_cor)
+    x_mes_plus = [3, 5, 0, 2, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    x_mes_minus = [3, 5, 0, 2, 0, 0, 0, 0, 0, 245, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    if int(c[1]) == 0:
+        pass
+    elif int(c[1]) > 0:
+        print('pluss')
+        for i in x_cor:
+            x_mes_plus[9] = i
+            dev.write(0x1, x_mes_plus, 10)
+    else:
+        print('minus')
+        for i in x_cor:
+            x_mes_minus[9] = 256-i
+            dev.write(0x1, x_mes_minus, 10)
+
+
+
 def serv_process():
-    while True:
-        r = q.get()
-        #print(r)
-        #data = (conn.recv(254).decode()).split('*')
-        #r = dev.read(0x81, 49, 64)
-        x_cor = [r[12], r[11], r[10], r[9]]
-        y_cor = [r[20], r[19], r[18], r[17]]
-        z_cor = [r[28], r[27], r[26], r[25]]
-        a_cor = [r[36], r[35], r[34], r[33]]
-        hex_x_cor = bytes(x_cor).hex()
-        dec_x_cor = struct.unpack('>i', bytes.fromhex(hex_x_cor))
-        hex_y_cor = bytes(y_cor).hex()
-        dec_y_cor = struct.unpack('>i', bytes.fromhex(hex_y_cor))
-        hex_z_cor = bytes(z_cor).hex()
-        hex_a_cor = bytes(a_cor).hex()
-        #print('координати x:', hex_x_cor)
-        #print('координати y:', hex_y_cor)
-        #print(x_cor, y_cor, z_cor, a_cor)
-        client_cor_x = int(data[0])
-        client_cor_y = int(data[1])
-        #print('координати кдієнта х', dec_x_cor)
-        #print('координати клієнта y:', dec_y_cor)
+    pass
 
 def keyboard_realese():
     max_speeed = 100
     dynamic_speed = 25
     count = 0
     x_mes_plus = [3, 5, 0, 2, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    x_mes_minus = [3, 5, 0, 2, 0, 0, 0, 0, 0, 245, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    x_mes_minus = [3, 5, 0, 2, 0, 0, 0, 0, 0, 10, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     y_mes_plus = [3, 5, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 108, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     y_mes_minus = [3, 5, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 245, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     z_mes_plus = [3, 5, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -76,45 +81,39 @@ def keyboard_realese():
     a_buffer = 0
     while True:
         if keyboard.is_pressed('6'):  # if key 'q' is pressed
-            #x_buffer += 1
             dev.write(0x1, x_mes_plus, 10)
         if keyboard.is_pressed('4'):  # if key 'q' is pressed
-            #x_buffer -= 1
             dev.write(0x1, x_mes_minus, 10)
         if keyboard.is_pressed('8'):  # if key 'q' is pressed
-            #y_buffer += 1
             dev.write(0x1, y_mes_plus, 10)
         if keyboard.is_pressed('2'):  # if key 'q' is pressed
-            #y_buffer -= 1
             dev.write(0x1, y_mes_minus, 10)
         if keyboard.is_pressed('+'):  # if key 'q' is pressed
-            #z_buffer += 1
             dev.write(0x1, z_mes_plus, 10)
         if keyboard.is_pressed('-'):  # if key 'q' is pressed
-            #z_buffer -= 1
             dev.write(0x1, z_mes_minus, 10)
         if keyboard.is_pressed('0'):  # if key 'q' is pressed
-            #a_buffer += 1
             dev.write(0x1, a_mes_plus, 10)
         if keyboard.is_pressed('.'):  # if key 'q' is pressed
-            #a_buffer -= 1
             dev.write(0x1, a_mes_minus, 10)
-        #sleep(0.1)
-        #print(count, x_buffer, y_buffer, z_buffer, a_buffer)
+
 
 q = queue.Queue()
+data_reading_sending = Thread(target=read_board_cor, args=(q,), name='Read cor')
+key = Thread(target=keyboard_realese, name='Keyboard')
 def run():
-    data_reading_sending = Thread(target=read_board_cor, args=(q,))
-    server_process = Thread(target=serv_process)
-    key = Thread(target=keyboard_realese)
+    #server_process = Thread(target=serv_process)
     data_reading_sending.start()
     key.start()
-    server_process.start()
+    #server_process.start()
     data_reading_sending.join()
-    server_process.join()
+    #server_process.join()
     key.join()
+
+
 if __name__ == '__main__':
     run()
+
 
 
 
