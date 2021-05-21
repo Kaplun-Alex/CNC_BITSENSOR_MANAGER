@@ -134,12 +134,12 @@ def key_y_plus():
 
 def all_cor_device_inserter(x, y, z, doz, mm_count=10000):
     x_cor_device_entry.delete(0, END)
-    y_cor_device_entry.delete(0, END)
-    z_cor_device_entry.delete(0, END)
-    doz_cor_device_entry.delete(0, END)
     x_cor_device_entry.insert(0, Decimal(str(x / mm_count)))
+    y_cor_device_entry.delete(0, END)
     y_cor_device_entry.insert(0, Decimal(str(y / mm_count)))
+    z_cor_device_entry.delete(0, END)
     z_cor_device_entry.insert(0, Decimal(str(z / mm_count)))
+    doz_cor_device_entry.delete(0, END)
     doz_cor_device_entry.insert(0, Decimal(str(doz / mm_count)))
 
 

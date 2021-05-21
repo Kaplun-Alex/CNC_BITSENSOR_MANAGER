@@ -65,4 +65,4 @@ def list_creator(speed: int, acceleration: int, impulse_count):     # макс �
     return res_list
 
 if __name__ == '__main__':
-    print(list_creator(255, 20, 1000))
+    print(list_creator(100, 20, 500))
