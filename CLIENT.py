@@ -188,7 +188,7 @@ def go_run():
                     r = []
                     for i in str_r:
                         r.append(int(i))
-                    # print(r, type(r))
+                    #print(r, type(r))
                     x_cor = [r[12], r[11], r[10], r[9]]
                     y_cor = [r[20], r[19], r[18], r[17]]
                     z_cor = [r[28], r[27], r[26], r[25]]

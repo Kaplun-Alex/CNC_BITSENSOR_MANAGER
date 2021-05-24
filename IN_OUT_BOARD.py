@@ -1,11 +1,11 @@
 from threading import Thread
-from time import time, sleep
 import queue
 import usb.util
 import usb.core
 import socket
 import keyboard
-import get_speed_profiile
+import interpolator
+import full_mes_creator
 
 
 VENDOR_ID = 0xA720
@@ -29,36 +29,27 @@ def read_board_cor(q):
     print(conn, addr)
     while True:
         data = (conn.recv(128).decode())
-        if data != mes_dict[1]:
-            coordinate_worker(data)
         r = dev.read(0x81, 49, 64)
         conn.send(str(r).encode())
+        if data != mes_dict[1]:
+            coordinate_worker(data)
         q.put(r)
 
 def coordinate_worker(data):
+    main_mes = [3, 5, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    cort_of_mes = ()
     c = data.split('*')
     print('C - ', c)    # C -  ['<COR>', '09937', '03331', '0333317', '033971', '<COR>']
-    x_cor = get_speed_profiile.list_creator(255, 10, int(c[1]))
-    y_cor = get_speed_profiile.list_creator(255, 10, int(c[2]))
-    z_cor = get_speed_profiile.list_creator(255, 10, int(c[3]))
-    doz_cor = get_speed_profiile.list_creator(255, 10, int(c[4]))
-    print(x_cor, y_cor, z_cor, doz_cor)
-    x_mes_plus = [3, 5, 0, 2, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    x_mes_minus = [3, 5, 0, 2, 0, 0, 0, 0, 0, 245, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    if int(c[1]) == 0:
-        pass
-    elif int(c[1]) > 0:
-        print('pluss')
-        for i in x_cor:
-            x_mes_plus[9] = i
-            dev.write(0x1, x_mes_plus, 10)
+
+    if int(c[1]) == 0 and int(c[2]) == 0 and int(c[3]) == 0 and int(c[4]) == 0:
+        print('No cor')
     else:
-        print('minus')
-        for i in x_cor:
-            x_mes_minus[9] = 256-i
-            dev.write(0x1, x_mes_minus, 10)
-
-
+        interpolator_dict = interpolator.speed_x_y_z_a_interpolator(255, 10, int(c[1]), int(c[2]), int(c[3]), int(c[4]))
+        print(interpolator_dict)    # like - {0: [5, 10, 10, 10, 10, 5], 1: [10, 20, 20, 20, 20, 10], 2: [7, 15, 15, 15, 15, 8], 3: [2, 5, 5, 5, 5, 3]}
+        main_list_mes = full_mes_creator.full_mes(interpolator_dict, c)
+        print(main_list_mes)
+        for i in main_list_mes:
+            dev.write(0x1, i, 20)
 
 def serv_process():
     pass
@@ -80,21 +71,21 @@ def keyboard_realese():
     z_buffer = 0
     a_buffer = 0
     while True:
-        if keyboard.is_pressed('6'):  # if key 'q' is pressed
+        if keyboard.is_pressed('w'):  # if key 'q' is pressed
             dev.write(0x1, x_mes_plus, 10)
-        if keyboard.is_pressed('4'):  # if key 'q' is pressed
+        if keyboard.is_pressed('x'):  # if key 'q' is pressed
             dev.write(0x1, x_mes_minus, 10)
-        if keyboard.is_pressed('8'):  # if key 'q' is pressed
+        if keyboard.is_pressed('d'):  # if key 'q' is pressed
             dev.write(0x1, y_mes_plus, 10)
-        if keyboard.is_pressed('2'):  # if key 'q' is pressed
+        if keyboard.is_pressed('a'):  # if key 'q' is pressed
             dev.write(0x1, y_mes_minus, 10)
-        if keyboard.is_pressed('+'):  # if key 'q' is pressed
+        if keyboard.is_pressed('e'):  # if key 'q' is pressed
             dev.write(0x1, z_mes_plus, 10)
-        if keyboard.is_pressed('-'):  # if key 'q' is pressed
+        if keyboard.is_pressed('c'):  # if key 'q' is pressed
             dev.write(0x1, z_mes_minus, 10)
-        if keyboard.is_pressed('0'):  # if key 'q' is pressed
+        if keyboard.is_pressed('q'):  # if key 'q' is pressed
             dev.write(0x1, a_mes_plus, 10)
-        if keyboard.is_pressed('.'):  # if key 'q' is pressed
+        if keyboard.is_pressed('z'):  # if key 'q' is pressed
             dev.write(0x1, a_mes_minus, 10)
 
 
