@@ -19,9 +19,10 @@ dev.write(0x01, [2, 10, 0, 36, 1, 0, 0, 0, 0], 10)
 dev.write(0x01, [3, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 0, 0, 0, 0, 0], 10)
 dev.write(0x01, [3, 5, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 10)
 
+mes_dict = {1: '<ОК!>', 2: '<COR>', 3: '<MOW!>'}
 
 def read_board_cor(q):
-    mes_dict = {1: '<ОК>', 2: '<COR>'}
+    global mes_dict
     board_sock = socket.socket()
     board_sock.bind(('', 5150))
     board_sock.listen(1)
@@ -38,16 +39,15 @@ def read_board_cor(q):
 def coordinate_worker(data):
     main_mes = [3, 5, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     cort_of_mes = ()
-    c = data.split('*')
+    c = data[:-5].split('*')
     print('C - ', c)    # C -  ['<COR>', '09937', '03331', '0333317', '033971', '<COR>']
-
     if int(c[1]) == 0 and int(c[2]) == 0 and int(c[3]) == 0 and int(c[4]) == 0:
         print('No cor')
     else:
-        interpolator_dict = interpolator.speed_x_y_z_a_interpolator(255, 10, int(c[1]), int(c[2]), int(c[3]), int(c[4]))
-        print(interpolator_dict)    # like - {0: [5, 10, 10, 10, 10, 5], 1: [10, 20, 20, 20, 20, 10], 2: [7, 15, 15, 15, 15, 8], 3: [2, 5, 5, 5, 5, 3]}
+        interpolator_dict = interpolator.speed_x_y_z_a_interpolator(int(c[5]), int(c[6]), int(c[1]), int(c[2]), int(c[3]), int(c[4]))
+        #print(interpolator_dict)    # like - {0: [5, 10, 10, 10, 10, 5], 1: [10, 20, 20, 20, 20, 10], 2: [7, 15, 15, 15, 15, 8], 3: [2, 5, 5, 5, 5, 3]}
         main_list_mes = full_mes_creator.full_mes(interpolator_dict, c)
-        print(main_list_mes)
+        #print(main_list_mes)
         for i in main_list_mes:
             dev.write(0x1, i, 20)
 
@@ -55,9 +55,6 @@ def serv_process():
     pass
 
 def keyboard_realese():
-    max_speeed = 100
-    dynamic_speed = 25
-    count = 0
     x_mes_plus = [3, 5, 0, 2, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     x_mes_minus = [3, 5, 0, 2, 0, 0, 0, 0, 0, 10, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     y_mes_plus = [3, 5, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 108, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -66,10 +63,7 @@ def keyboard_realese():
     z_mes_minus = [3, 5, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 245, 255, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     a_mes_plus = [3, 5, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0]
     a_mes_minus = [3, 5, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 245, 255, 255, 255, 0, 0, 0, 0, 0]
-    x_buffer = 0
-    y_buffer = 0
-    z_buffer = 0
-    a_buffer = 0
+
     while True:
         if keyboard.is_pressed('w'):  # if key 'q' is pressed
             dev.write(0x1, x_mes_plus, 10)
