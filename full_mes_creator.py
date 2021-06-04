@@ -56,7 +56,7 @@ def full_mes(cor_dict, go_mes):
         # Проверяем a
         if int(go_mes[4]) > 0:
             mes[21] = a_speed[i]
-        elif int(go_mes[2]) < 0:
+        elif int(go_mes[4]) < 0:
             if a_speed[i] == 0:
                 mes[21], mes[22], mes[23], mes[24] = 0, 0, 0, 0
             elif a_speed[i] == 1:
@@ -74,5 +74,5 @@ def full_mes(cor_dict, go_mes):
 if __name__ == '__main__':
     item = {0: [1, 10, 10, 10, 10, 5], 1: [1, 20, 20, 20, 20, 10],
             2: [1, 15, 15, 15, 15, 8], 3: [1, 5, 5, 5, 5, 3], 5: 6}
-    go = ['<COR>', '-9937', '1000', '-1000', '3397', '<COR>']
+    go = ['<COR>', '9937', '1000', '1000', '-3397', '<COR>']
     print(full_mes(item, go))
